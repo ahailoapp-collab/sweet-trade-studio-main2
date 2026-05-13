@@ -36,6 +36,7 @@ const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const isMobile = useIsMobile();
   const [videosReady, setVideosReady] = useState(false);
+  const [allowHeroVideo, setAllowHeroVideo] = useState(false);
 
   useEffect(() => {
     if (isMobile) return;
@@ -46,22 +47,44 @@ const Index = () => {
   // Defer video mount until after first paint; on mobile wait for idle to save data/CPU.
   useEffect(() => {
     if (videosReady) return;
-    // Mobile-first performance: keep the hero as an image on mobile to avoid large MP4 downloads.
-    if (isMobile) return;
-    const w = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number };
+
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
     // Connection-speed gate: skip/delay video on Data Saver or slow networks.
     const nav = navigator as Navigator & {
       connection?: { saveData?: boolean; effectiveType?: string };
     };
     const conn = nav.connection;
-    const isSlow = !!conn && (conn.saveData === true || conn.effectiveType === "slow-2g" || conn.effectiveType === "2g");
-    if (isSlow) {
-      // Never auto-mount videos on slow connections — poster fallback stays.
-      return;
-    }
-    const isModerate = !!conn && conn.effectiveType === "3g";
+    const saveData = conn?.saveData === true;
+    const effectiveType = conn?.effectiveType;
+    const slow = effectiveType === "slow-2g" || effectiveType === "2g";
+    const moderate = effectiveType === "3g";
+
+    // Default: enable video on desktop. On mobile, enable only for non-slow connections (and not on reduced motion / data saver).
+    const canUseVideo =
+      !reducedMotion &&
+      !saveData &&
+      !slow &&
+      (!isMobile || effectiveType === undefined || effectiveType === "4g");
+
+    setAllowHeroVideo(canUseVideo);
+    if (!canUseVideo) return;
+
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number };
     const trigger = () => setVideosReady(true);
-    const id = window.setTimeout(trigger, isModerate ? 1500 : 200);
+
+    // On mobile, be gentler: wait for idle or a longer timeout.
+    if (isMobile) {
+      const timeout = moderate ? 7000 : 3500;
+      const id = w.requestIdleCallback
+        ? w.requestIdleCallback(trigger, { timeout })
+        : window.setTimeout(trigger, moderate ? 5500 : 2500);
+      return () => {
+        if (w.requestIdleCallback) (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(id as number);
+        else clearTimeout(id as number);
+      };
+    }
+
+    const id = window.setTimeout(trigger, moderate ? 1500 : 200);
     return () => clearTimeout(id);
   }, [isMobile, videosReady]);
 
@@ -83,7 +106,7 @@ const Index = () => {
             decoding="async"
             className="absolute inset-0 h-full w-full object-cover scale-110 transition-opacity duration-1000 blur-xl md:blur-2xl"
           />
-          {videosReady && !isMobile && (
+          {videosReady && allowHeroVideo && (
             <video
               key={`video-${active.video}`}
               src={active.video}
@@ -92,7 +115,7 @@ const Index = () => {
               muted
               loop
               playsInline
-              preload="none"
+              preload={isMobile ? "metadata" : "auto"}
               disablePictureInPicture
               className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000"
             />
