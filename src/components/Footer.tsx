@@ -20,12 +20,12 @@ const Footer = () => (
     <div className="container relative py-14 md:py-16">
       <div className="grid gap-10 md:grid-cols-4">
         <div className="md:col-span-2">
-          <img src={logo} alt="Rabah Sparkle" width={56} height={56} className="h-14 w-auto mb-4 drop-shadow-lg" />
+          <img src={logo} alt="Rabah Sparkle" width={56} height={56} loading="lazy" decoding="async" className="h-14 w-auto mb-4 drop-shadow-lg" />
           <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
             Power that Cleans, Quality that Lasts. Premium cleaning products engineered for homes, businesses & institutions.
           </p>
           <div className="mt-5 inline-flex items-center gap-2 rounded-full glass border border-border/50 px-3 py-1.5">
-            <img src={zimFlag} alt="Zimbabwe" width={20} height={20} className="h-5 w-5 object-cover rounded-sm" />
+            <img src={zimFlag} alt="Zimbabwe" width={20} height={20} loading="lazy" decoding="async" className="h-5 w-5 object-cover rounded-sm" />
             <span className="text-xs font-semibold text-foreground/80">Proudly Made in Zimbabwe</span>
           </div>
         </div>

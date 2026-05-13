@@ -39,7 +39,8 @@ const Index = () => {
   const [allowHeroVideo, setAllowHeroVideo] = useState(false);
   const [activeLayer, setActiveLayer] = useState<0 | 1>(0);
   const [layerSrc, setLayerSrc] = useState<[string | null, string | null]>([null, null]);
-  const videoRefs = [useRef<HTMLVideoElement | null>(null), useRef<HTMLVideoElement | null>(null)] as const;
+  const videoRef0 = useRef<HTMLVideoElement | null>(null);
+  const videoRef1 = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (isMobile) return;
@@ -143,7 +144,7 @@ const Index = () => {
         nextState[nextLayer] = next.video;
         return nextState;
       });
-      const el = videoRefs[nextLayer].current;
+      const el = (nextLayer === 0 ? videoRef0 : videoRef1).current;
       if (!el) return;
       try {
         el.load();
@@ -153,7 +154,7 @@ const Index = () => {
     }, prewarmMs);
 
     return () => clearTimeout(prewarmId);
-  }, [active.video, activeLayer, canUseVideo, isMobile, next.video, videoRefs]);
+  }, [active.video, activeLayer, canUseVideo, isMobile, next.video]);
 
   // When the slide index changes, crossfade to the other layer.
   useEffect(() => {
@@ -164,14 +165,14 @@ const Index = () => {
   // Keep the newly active layer playing once it becomes active.
   useEffect(() => {
     if (!canUseVideo) return;
-    const el = videoRefs[activeLayer].current;
+    const el = (activeLayer === 0 ? videoRef0 : videoRef1).current;
     if (!el) return;
     try {
       void el.play();
     } catch {
       // ignore
     }
-  }, [activeLayer, canUseVideo, videoRefs]);
+  }, [activeLayer, canUseVideo]);
 
   return (
     <main className="overflow-x-hidden">
@@ -182,7 +183,7 @@ const Index = () => {
           {canUseVideo && (
             <>
               <video
-                ref={videoRefs[0]}
+                ref={videoRef0}
                 src={layerSrc[0] ?? undefined}
                 autoPlay
                 muted
@@ -194,7 +195,7 @@ const Index = () => {
                 className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 will-change-[opacity] ${activeLayer === 0 ? "opacity-100" : "opacity-0"}`}
               />
               <video
-                ref={videoRefs[1]}
+                ref={videoRef1}
                 src={layerSrc[1] ?? undefined}
                 autoPlay
                 muted
@@ -220,6 +221,8 @@ const Index = () => {
           src={logo}
           alt=""
           aria-hidden="true"
+          loading="lazy"
+          decoding="async"
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] max-w-[600px] opacity-[0.06] pointer-events-none select-none"
         />
 

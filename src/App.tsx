@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import ScrollToTop from "@/components/ScrollToTop";
 import logo from "@/assets/logo.webp";
-import Index from "./pages/Index";
+const Index = lazy(() => import("./pages/Index"));
 
 const Products = lazy(() => import("./pages/Products"));
 const About = lazy(() => import("./pages/About"));
