@@ -58,7 +58,7 @@ const About = () => (
           <div className="relative mx-auto w-full max-w-md">
             <div className="absolute -inset-6 gradient-primary rounded-[2rem] opacity-20 blur-3xl" />
             <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-border/50 shadow-elegant">
-              <img src={ceoImage} alt="Mrs Gamu Sakupwanya - CEO" className="h-full w-full object-cover" loading="lazy" />
+              <img src={ceoImage} alt="Mrs Gamu Sakupwanya - CEO" width={1000} height={890} className="h-full w-full object-cover" loading="lazy" decoding="async" />
               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background/70 to-transparent" />
             </div>
             <div className="absolute -bottom-5 -right-2 sm:-right-5 glass border border-border/50 rounded-2xl px-5 py-3 shadow-elegant max-w-[80%]">
@@ -77,7 +77,7 @@ const About = () => (
             <div className="mt-6 flex items-center gap-3">
               <div className="h-px flex-1 bg-border" />
               <div className="flex items-center gap-2">
-                <img src={zimFlag} alt="Zimbabwe" width={20} height={20} className="h-5 w-5 object-cover rounded-sm" />
+                <img src={zimFlag} alt="Zimbabwe" width={20} height={20} loading="lazy" decoding="async" className="h-5 w-5 object-cover rounded-sm" />
                 <span className="text-xs font-semibold text-foreground/80">Harare, Zimbabwe</span>
               </div>
             </div>
@@ -97,11 +97,11 @@ const About = () => (
         </Reveal>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { icon: CheckCircle2, text: "Affordable pricing without compromise", image: whyAffordable },
-            { icon: Droplets, text: "Flexible packaging for every need", image: whyFlexible },
-            { icon: Shield, text: "Custom supply for businesses", image: whyCustom },
-            { icon: Sparkles, text: "Reliable, powerful performance", image: whyReliable },
-          ].map(({ icon: Icon, text, image }, i) => (
+            { icon: CheckCircle2, text: "Affordable pricing without compromise", image: whyAffordable, width: 1200, height: 800 },
+            { icon: Droplets, text: "Flexible packaging for every need", image: whyFlexible, width: 1200, height: 800 },
+            { icon: Shield, text: "Custom supply for businesses", image: whyCustom, width: 1200, height: 800 },
+            { icon: Sparkles, text: "Reliable, powerful performance", image: whyReliable, width: 799, height: 1200 },
+          ].map(({ icon: Icon, text, image, width, height }, i) => (
             <Reveal key={text} delay={i * 100}>
               <div className="group relative h-full overflow-hidden rounded-2xl glass border border-border/50 p-6 hover:border-primary/40 transition-all duration-500 hover:-translate-y-1 shadow-card hover:shadow-elegant">
                 <img
@@ -109,6 +109,9 @@ const About = () => (
                   alt=""
                   aria-hidden="true"
                   loading="lazy"
+                  decoding="async"
+                  width={width}
+                  height={height}
                   className="absolute inset-0 h-full w-full object-cover opacity-0 group-data-[visible=true]/reveal:opacity-90 group-hover:opacity-100 transition-opacity duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
                   style={{ transitionDelay: `${i * 100}ms` }}
                 />
@@ -136,18 +139,21 @@ const About = () => (
         </Reveal>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {[
-            { icon: Home, label: "Households", image: serveHouseholds },
-            { icon: School, label: "Schools", image: serveSchools },
-            { icon: Building2, label: "Clinics", image: serveClinics },
-            { icon: UtensilsCrossed, label: "Restaurants", image: serveRestaurants },
-            { icon: Landmark, label: "Institutions", image: serveInstitutions },
-          ].map(({ icon: Icon, label, image }, i) => (
+            { icon: Home, label: "Households", image: serveHouseholds, width: 800, height: 1200 },
+            { icon: School, label: "Schools", image: serveSchools, width: 1200, height: 900 },
+            { icon: Building2, label: "Clinics", image: serveClinics, width: 800, height: 1200 },
+            { icon: UtensilsCrossed, label: "Restaurants", image: serveRestaurants, width: 1200, height: 906 },
+            { icon: Landmark, label: "Institutions", image: serveInstitutions, width: 1189, height: 1200 },
+          ].map(({ icon: Icon, label, image, width, height }, i) => (
             <Reveal key={label} delay={i * 80}>
               <div className="group relative aspect-[4/5] overflow-hidden rounded-2xl border border-border/50 shadow-card hover:shadow-elegant hover:-translate-y-1 hover:border-secondary/40 transition-all duration-500">
                 <img
                   src={image}
                   alt={label}
                   loading="lazy"
+                  width={width}
+                  height={height}
+                  decoding="async"
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-background/10" />

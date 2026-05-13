@@ -184,28 +184,30 @@ const Index = () => {
             <>
               <video
                 ref={videoRef0}
-                src={layerSrc[0] ?? undefined}
                 autoPlay
                 muted
                 loop
                 playsInline
-                preload={isMobile ? "metadata" : "auto"}
+                preload="none"
                 disablePictureInPicture
                 disableRemotePlayback
                 className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 will-change-[opacity] ${activeLayer === 0 ? "opacity-100" : "opacity-0"}`}
-              />
+              >
+                {layerSrc[0] && <source src={layerSrc[0]} type="video/mp4" />}
+              </video>
               <video
                 ref={videoRef1}
-                src={layerSrc[1] ?? undefined}
                 autoPlay
                 muted
                 loop
                 playsInline
-                preload="metadata"
+                preload="none"
                 disablePictureInPicture
                 disableRemotePlayback
                 className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 will-change-[opacity] ${activeLayer === 1 ? "opacity-100" : "opacity-0"}`}
-              />
+              >
+                {layerSrc[1] && <source src={layerSrc[1]} type="video/mp4" />}
+              </video>
             </>
           )}
           <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background" />
@@ -369,14 +371,20 @@ const Index = () => {
                     <img
                       src={p.image}
                       alt={p.name}
+                      width={675}
+                      height={900}
                       className="absolute inset-0 h-full w-full object-contain p-8 transition-all duration-700 ease-out group-hover:scale-105 drop-shadow-2xl"
                       loading="lazy"
+                      decoding="async"
                     />
                     <img
                       src={p.mini}
                       alt=""
+                      width={675}
+                      height={900}
                       className="absolute bottom-4 right-4 h-20 w-20 object-contain opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-700 drop-shadow-xl"
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                   <div className="p-6 flex items-center justify-between">
@@ -430,8 +438,11 @@ const Index = () => {
                   <img
                     src={ceoImage}
                     alt="Mrs Gamu Sakupwanya - CEO of Rabah Sparkle Detergents"
+                    width={1000}
+                    height={890}
                     className="relative h-full w-full object-cover"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background/80 to-transparent" />
                 </div>

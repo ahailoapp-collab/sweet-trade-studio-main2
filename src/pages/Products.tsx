@@ -18,21 +18,23 @@ interface Product {
   price: string;
   benefit: string;
   image: string;
+  width: number;
+  height: number;
   wa: string;
 }
 
 const dishwashing: Product[] = [
-  { name: "Dishwashing Liquid", size: "750ml", price: "$1", benefit: "Everyday household sparkle.", image: detergent750ml, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Dishwashing Liquid 750ml") },
-  { name: "Dishwashing Liquid", size: "2L", price: "$2", benefit: "Family-size value.", image: detergentSmall, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Dishwashing Liquid 2L") },
-  { name: "Dishwashing Liquid", size: "5L", price: "$6", benefit: "Bulk for busy kitchens.", image: detergent5l, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Dishwashing Liquid 5L") },
-  { name: "Dishwashing Liquid", size: "20L", price: "$24", benefit: "Industrial-grade supply.", image: detergent20l, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Dishwashing Liquid 20L") },
+  { name: "Dishwashing Liquid", size: "750ml", price: "$1", benefit: "Everyday household sparkle.", image: detergent750ml, width: 675, height: 900, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Dishwashing Liquid 750ml") },
+  { name: "Dishwashing Liquid", size: "2L", price: "$2", benefit: "Family-size value.", image: detergentSmall, width: 960, height: 1280, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Dishwashing Liquid 2L") },
+  { name: "Dishwashing Liquid", size: "5L", price: "$6", benefit: "Bulk for busy kitchens.", image: detergent5l, width: 675, height: 900, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Dishwashing Liquid 5L") },
+  { name: "Dishwashing Liquid", size: "20L", price: "$24", benefit: "Industrial-grade supply.", image: detergent20l, width: 675, height: 900, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Dishwashing Liquid 20L") },
 ];
 
 const bleach: Product[] = [
-  { name: "Thick Bleach", size: "750ml", price: "$1.50", benefit: "Compact home disinfectant.", image: bleach750ml, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Thick Bleach 750ml") },
-  { name: "Thick Bleach", size: "2L", price: "$3", benefit: "Family-size sanitisation.", image: bleachSmall, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Thick Bleach 2L") },
-  { name: "Thick Bleach", size: "5L", price: "$8", benefit: "Heavy-duty for kitchens.", image: bleach5l, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Thick Bleach 5L") },
-  { name: "Thick Bleach", size: "20L", price: "$30", benefit: "Maximum institutional supply.", image: bleach20l, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Thick Bleach 20L") },
+  { name: "Thick Bleach", size: "750ml", price: "$1.50", benefit: "Compact home disinfectant.", image: bleach750ml, width: 675, height: 900, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Thick Bleach 750ml") },
+  { name: "Thick Bleach", size: "2L", price: "$3", benefit: "Family-size sanitisation.", image: bleachSmall, width: 960, height: 1280, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Thick Bleach 2L") },
+  { name: "Thick Bleach", size: "5L", price: "$8", benefit: "Heavy-duty for kitchens.", image: bleach5l, width: 675, height: 900, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Thick Bleach 5L") },
+  { name: "Thick Bleach", size: "20L", price: "$30", benefit: "Maximum institutional supply.", image: bleach20l, width: 675, height: 900, wa: WA_BASE + encodeURIComponent("Hi, I'd like to order Thick Bleach 20L") },
 ];
 
 const Reveal = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => {
@@ -62,6 +64,9 @@ const Card = ({ p, delay }: { p: Product; delay: number }) => (
         <img
           src={p.image}
           alt={`${p.name} ${p.size}`}
+          width={p.width}
+          height={p.height}
+          decoding="async"
           className="relative h-full w-full object-contain p-5 transition-all duration-700 ease-out group-hover:scale-110 drop-shadow-2xl"
           loading="lazy"
         />

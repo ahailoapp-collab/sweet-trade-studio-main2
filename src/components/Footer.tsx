@@ -12,8 +12,11 @@ const Footer = () => (
       src={footerBg}
       alt=""
       aria-hidden="true"
+      width={800}
+      height={1200}
       className="absolute inset-0 h-full w-full object-cover opacity-15 pointer-events-none"
       loading="lazy"
+      decoding="async"
     />
     <div className="absolute inset-0 bg-gradient-to-b from-card/80 via-card/70 to-card pointer-events-none" />
     <div className="absolute inset-0 gradient-aurora opacity-40 pointer-events-none" />
