@@ -1,5 +1,5 @@
 import { CheckCircle2, Droplets, Shield, Sparkles, ArrowRight, MessageCircle, Star } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -102,12 +102,6 @@ const Index = () => {
 
   const canUseVideo = videosReady && allowHeroVideo;
 
-  const posterSrc = useMemo(() => {
-    // If we can use video, prefer the currently visible slide's poster.
-    // Otherwise just show the current slide's poster (works for slow networks / data saver).
-    return active.poster;
-  }, [active.poster]);
-
   // Smooth playback strategy:
   // - Keep two <video> layers and crossfade them.
   // - Only "arm" the next video's src shortly before switching to reduce concurrent downloading.
@@ -185,21 +179,11 @@ const Index = () => {
       <section className="relative min-h-[100svh] flex items-center pt-24 pb-10 md:pt-28 md:pb-24 overflow-hidden">
         {/* Cycling video background */}
         <div className="absolute inset-0 pointer-events-none">
-          {/* Lightweight poster fallback shown until videos are ready (and as the only backdrop on slow connections) */}
-          <img
-            src={posterSrc}
-            alt=""
-            aria-hidden="true"
-            loading="eager"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-cover scale-110 transition-opacity duration-1000 blur-xl md:blur-2xl"
-          />
           {canUseVideo && (
             <>
               <video
                 ref={videoRefs[0]}
                 src={layerSrc[0] ?? undefined}
-                poster={active.poster}
                 autoPlay
                 muted
                 loop
@@ -212,7 +196,6 @@ const Index = () => {
               <video
                 ref={videoRefs[1]}
                 src={layerSrc[1] ?? undefined}
-                poster={active.poster}
                 autoPlay
                 muted
                 loop
