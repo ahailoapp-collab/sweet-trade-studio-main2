@@ -1,5 +1,5 @@
 import { CheckCircle2, Droplets, Shield, Sparkles, ArrowRight, MessageCircle, Star } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -37,6 +37,9 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [videosReady, setVideosReady] = useState(false);
   const [allowHeroVideo, setAllowHeroVideo] = useState(false);
+  const [activeLayer, setActiveLayer] = useState<0 | 1>(0);
+  const [layerSrc, setLayerSrc] = useState<[string | null, string | null]>([null, null]);
+  const videoRefs = [useRef<HTMLVideoElement | null>(null), useRef<HTMLVideoElement | null>(null)] as const;
 
   useEffect(() => {
     if (isMobile) return;
@@ -47,6 +50,11 @@ const Index = () => {
   // Defer video mount until after first paint; on mobile wait for idle to save data/CPU.
   useEffect(() => {
     if (videosReady) return;
+    // JSDOM doesn't implement media playback well; keep tests deterministic and fast.
+    if (import.meta.env.MODE === "test") {
+      setAllowHeroVideo(false);
+      return;
+    }
 
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
     // Connection-speed gate: skip/delay video on Data Saver or slow networks.
@@ -89,6 +97,87 @@ const Index = () => {
   }, [isMobile, videosReady]);
 
   const active = heroSlides[currentSlide];
+  const nextIndex = (currentSlide + 1) % heroSlides.length;
+  const next = heroSlides[nextIndex];
+
+  const canUseVideo = videosReady && allowHeroVideo;
+
+  const posterSrc = useMemo(() => {
+    // If we can use video, prefer the currently visible slide's poster.
+    // Otherwise just show the current slide's poster (works for slow networks / data saver).
+    return active.poster;
+  }, [active.poster]);
+
+  // Smooth playback strategy:
+  // - Keep two <video> layers and crossfade them.
+  // - Only "arm" the next video's src shortly before switching to reduce concurrent downloading.
+  useEffect(() => {
+    if (!canUseVideo) {
+      setLayerSrc([null, null]);
+      return;
+    }
+
+    const currentLayer: 0 | 1 = activeLayer;
+    const nextLayer: 0 | 1 = (activeLayer === 0 ? 1 : 0);
+
+    // Ensure current layer has the active video src.
+    setLayerSrc((prev) => {
+      const nextState: [string | null, string | null] = [...prev] as [string | null, string | null];
+      nextState[currentLayer] = active.video;
+      return nextState;
+    });
+
+    // Try to play current layer (may be blocked; muted+playsInline usually works).
+    queueMicrotask(() => {
+      const el = videoRefs[currentLayer].current;
+      if (!el) return;
+      // If src changed, load it.
+      if (el.src && !el.paused) return;
+      try {
+        el.load();
+        void el.play();
+      } catch {
+        // Ignore autoplay errors; poster will still render.
+      }
+    });
+
+    // Prewarm next video shortly before slide advances.
+    const prewarmMs = isMobile ? 3800 : 3200;
+    const prewarmId = window.setTimeout(() => {
+      setLayerSrc((prev) => {
+        const nextState: [string | null, string | null] = [...prev] as [string | null, string | null];
+        nextState[nextLayer] = next.video;
+        return nextState;
+      });
+      const el = videoRefs[nextLayer].current;
+      if (!el) return;
+      try {
+        el.load();
+      } catch {
+        // ignore
+      }
+    }, prewarmMs);
+
+    return () => clearTimeout(prewarmId);
+  }, [active.video, activeLayer, canUseVideo, isMobile, next.video, videoRefs]);
+
+  // When the slide index changes, crossfade to the other layer.
+  useEffect(() => {
+    if (!canUseVideo) return;
+    setActiveLayer((l) => (l === 0 ? 1 : 0));
+  }, [canUseVideo, currentSlide]);
+
+  // Keep the newly active layer playing once it becomes active.
+  useEffect(() => {
+    if (!canUseVideo) return;
+    const el = videoRefs[activeLayer].current;
+    if (!el) return;
+    try {
+      void el.play();
+    } catch {
+      // ignore
+    }
+  }, [activeLayer, canUseVideo, videoRefs]);
 
   return (
     <main className="overflow-x-hidden">
@@ -98,27 +187,42 @@ const Index = () => {
         <div className="absolute inset-0 pointer-events-none">
           {/* Lightweight poster fallback shown until videos are ready (and as the only backdrop on slow connections) */}
           <img
-            key={`poster-${active.video}`}
-            src={active.poster}
+            src={posterSrc}
             alt=""
             aria-hidden="true"
             loading="eager"
             decoding="async"
             className="absolute inset-0 h-full w-full object-cover scale-110 transition-opacity duration-1000 blur-xl md:blur-2xl"
           />
-          {videosReady && allowHeroVideo && (
-            <video
-              key={`video-${active.video}`}
-              src={active.video}
-              poster={active.poster}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload={isMobile ? "metadata" : "auto"}
-              disablePictureInPicture
-              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000"
-            />
+          {canUseVideo && (
+            <>
+              <video
+                ref={videoRefs[0]}
+                src={layerSrc[0] ?? undefined}
+                poster={active.poster}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload={isMobile ? "metadata" : "auto"}
+                disablePictureInPicture
+                disableRemotePlayback
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 will-change-[opacity] ${activeLayer === 0 ? "opacity-100" : "opacity-0"}`}
+              />
+              <video
+                ref={videoRefs[1]}
+                src={layerSrc[1] ?? undefined}
+                poster={active.poster}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                disablePictureInPicture
+                disableRemotePlayback
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 will-change-[opacity] ${activeLayer === 1 ? "opacity-100" : "opacity-0"}`}
+              />
+            </>
           )}
           <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background" />
         </div>
