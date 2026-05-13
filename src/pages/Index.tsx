@@ -38,13 +38,16 @@ const Index = () => {
   const [videosReady, setVideosReady] = useState(false);
 
   useEffect(() => {
+    if (isMobile) return;
     const id = setInterval(() => setCurrentSlide((s) => (s + 1) % heroSlides.length), 5500);
     return () => clearInterval(id);
-  }, []);
+  }, [isMobile]);
 
   // Defer video mount until after first paint; on mobile wait for idle to save data/CPU.
   useEffect(() => {
     if (videosReady) return;
+    // Mobile-first performance: keep the hero as an image on mobile to avoid large MP4 downloads.
+    if (isMobile) return;
     const w = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number };
     // Connection-speed gate: skip/delay video on Data Saver or slow networks.
     const nav = navigator as Navigator & {
@@ -58,16 +61,6 @@ const Index = () => {
     }
     const isModerate = !!conn && conn.effectiveType === "3g";
     const trigger = () => setVideosReady(true);
-    if (isMobile) {
-      const timeout = isModerate ? 6000 : 2500;
-      const id = w.requestIdleCallback
-        ? w.requestIdleCallback(trigger, { timeout })
-        : window.setTimeout(trigger, isModerate ? 4000 : 1500);
-      return () => {
-        if (w.requestIdleCallback) (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(id as number);
-        else clearTimeout(id as number);
-      };
-    }
     const id = window.setTimeout(trigger, isModerate ? 1500 : 200);
     return () => clearTimeout(id);
   }, [isMobile, videosReady]);
@@ -81,30 +74,29 @@ const Index = () => {
         {/* Cycling video background */}
         <div className="absolute inset-0 pointer-events-none">
           {/* Lightweight poster fallback shown until videos are ready (and as the only backdrop on slow connections) */}
-          {heroSlides.map((slide, i) => (
-            <img
-              key={`poster-${slide.video}`}
-              src={slide.poster}
-              alt=""
-              aria-hidden="true"
-              loading="eager"
-              decoding="async"
-              className={`absolute inset-0 h-full w-full object-cover blur-2xl scale-110 transition-opacity duration-1000 ${i === currentSlide ? "opacity-100" : "opacity-0"}`}
-            />
-          ))}
-          {videosReady && heroSlides.map((slide, i) => (
+          <img
+            key={`poster-${active.video}`}
+            src={active.poster}
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover scale-110 transition-opacity duration-1000 blur-xl md:blur-2xl"
+          />
+          {videosReady && !isMobile && (
             <video
-              key={slide.video}
-              src={slide.video}
-              poster={slide.poster}
+              key={`video-${active.video}`}
+              src={active.video}
+              poster={active.poster}
               autoPlay
               muted
               loop
               playsInline
-              preload={isMobile ? "metadata" : "auto"}
-              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${i === currentSlide ? "opacity-100" : "opacity-0"}`}
+              preload="none"
+              disablePictureInPicture
+              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000"
             />
-          ))}
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background" />
         </div>
         {/* Aurora background on top of video */}
