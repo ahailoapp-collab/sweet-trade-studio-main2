@@ -28,8 +28,8 @@ const products = [
 ];
 
 const heroSlides = [
+  { video: "/videos/detergent-small.mp4", poster: detergent5l, image: detergent5l, name: "Dishwashing 5L", label: "Sparkling Clean", icon: Sparkles },
   { video: "/videos/bleach.mp4", poster: bleach5l, image: bleach5l, name: "Thick Bleach 5L", label: "Heavy Duty", icon: Shield },
-  { video: "/videos/detergent.mp4", poster: detergent5l, image: detergent5l, name: "Dishwashing 5L", label: "Sparkling Clean", icon: Sparkles },
 ];
 
 const Index = () => {
