@@ -60,22 +60,13 @@ const Index = () => {
     }
 
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
-    // Connection-speed gate: skip/delay video on Data Saver or slow networks.
+    // Keep gating minimal in production so hero videos reliably play.
+    // Only respect reduced-motion and Data Saver; do not block on effective network type.
     const nav = navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
+      connection?: { saveData?: boolean };
     };
-    const conn = nav.connection;
-    const saveData = conn?.saveData === true;
-    const effectiveType = conn?.effectiveType;
-    const slow = effectiveType === "slow-2g" || effectiveType === "2g";
-    const moderate = effectiveType === "3g";
-
-    // Default: enable video on desktop. On mobile, enable only for non-slow connections (and not on reduced motion / data saver).
-    const canUseVideo =
-      !reducedMotion &&
-      !saveData &&
-      !slow &&
-      (!isMobile || effectiveType === undefined || effectiveType === "4g");
+    const saveData = nav.connection?.saveData === true;
+    const canUseVideo = !reducedMotion && !saveData;
 
     setAllowHeroVideo(canUseVideo);
     if (!canUseVideo) return;
@@ -85,17 +76,17 @@ const Index = () => {
 
     // On mobile, be gentler: wait for idle or a longer timeout.
     if (isMobile) {
-      const timeout = moderate ? 7000 : 3500;
+      const timeout = 3500;
       const id = w.requestIdleCallback
         ? w.requestIdleCallback(trigger, { timeout })
-        : window.setTimeout(trigger, moderate ? 5500 : 2500);
+        : window.setTimeout(trigger, 2500);
       return () => {
         if (w.requestIdleCallback) (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(id as number);
         else clearTimeout(id as number);
       };
     }
 
-    const id = window.setTimeout(trigger, moderate ? 1500 : 200);
+    const id = window.setTimeout(trigger, 200);
     return () => clearTimeout(id);
   }, [isMobile, videosReady]);
 
