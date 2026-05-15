@@ -33,20 +33,16 @@ const heroSlides = [
 ];
 
 const Index = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState<0 | 1>(0);
   const isMobile = useIsMobile();
   const [videosReady, setVideosReady] = useState(false);
   const [allowHeroVideo, setAllowHeroVideo] = useState(false);
   const [activeLayer, setActiveLayer] = useState<0 | 1>(0);
-  const [layerSrc, setLayerSrc] = useState<[string | null, string | null]>([null, null]);
   const videoRef0 = useRef<HTMLVideoElement | null>(null);
   const videoRef1 = useRef<HTMLVideoElement | null>(null);
-
-  useEffect(() => {
-    if (isMobile) return;
-    const id = setInterval(() => setCurrentSlide((s) => (s + 1) % heroSlides.length), 5500);
-    return () => clearInterval(id);
-  }, [isMobile]);
+  const activeLayerRef = useRef<0 | 1>(0);
+  const startedRef = useRef(false);
+  const switchLockRef = useRef(false);
 
   // Defer video mount until after first paint; on mobile wait for idle to save data/CPU.
   useEffect(() => {
@@ -54,6 +50,12 @@ const Index = () => {
     // JSDOM doesn't implement media playback well; keep tests deterministic and fast.
     if (import.meta.env.MODE === "test") {
       setAllowHeroVideo(false);
+      return;
+    }
+    // Local dev ergonomics: always enable hero video so you can validate playback easily.
+    if (import.meta.env.DEV) {
+      setAllowHeroVideo(true);
+      setVideosReady(true);
       return;
     }
 
@@ -97,82 +99,73 @@ const Index = () => {
     return () => clearTimeout(id);
   }, [isMobile, videosReady]);
 
-  const active = heroSlides[currentSlide];
-  const nextIndex = (currentSlide + 1) % heroSlides.length;
-  const next = heroSlides[nextIndex];
-
   const canUseVideo = videosReady && allowHeroVideo;
 
-  // Smooth playback strategy:
-  // - Keep two <video> layers and crossfade them.
-  // - Only "arm" the next video's src shortly before switching to reduce concurrent downloading.
   useEffect(() => {
-    if (!canUseVideo) {
-      setLayerSrc([null, null]);
-      return;
-    }
+    activeLayerRef.current = activeLayer;
+  }, [activeLayer]);
 
-    const currentLayer: 0 | 1 = activeLayer;
-    const nextLayer: 0 | 1 = (activeLayer === 0 ? 1 : 0);
+  const startLayer = (layer: 0 | 1) => {
+    const v0 = videoRef0.current;
+    const v1 = videoRef1.current;
+    if (!v0 || !v1) return;
 
-    // Ensure current layer has the active video src.
-    setLayerSrc((prev) => {
-      const nextState: [string | null, string | null] = [...prev] as [string | null, string | null];
-      nextState[currentLayer] = active.video;
-      return nextState;
-    });
+    const nextVideo = layer === 0 ? v0 : v1;
+    const prevVideo = layer === 0 ? v1 : v0;
 
-    // Try to play current layer (may be blocked; muted+playsInline usually works).
-    queueMicrotask(() => {
-      const el = videoRefs[currentLayer].current;
-      if (!el) return;
-      // If src changed, load it.
-      if (el.src && !el.paused) return;
-      try {
-        el.load();
-        void el.play();
-      } catch {
-        // Ignore autoplay errors; poster will still render.
-      }
-    });
+    setActiveLayer(layer);
+    activeLayerRef.current = layer;
+    setCurrentSlide(layer);
 
-    // Prewarm next video shortly before slide advances.
-    const prewarmMs = isMobile ? 3800 : 3200;
-    const prewarmId = window.setTimeout(() => {
-      setLayerSrc((prev) => {
-        const nextState: [string | null, string | null] = [...prev] as [string | null, string | null];
-        nextState[nextLayer] = next.video;
-        return nextState;
-      });
-      const el = (nextLayer === 0 ? videoRef0 : videoRef1).current;
-      if (!el) return;
-      try {
-        el.load();
-      } catch {
-        // ignore
-      }
-    }, prewarmMs);
-
-    return () => clearTimeout(prewarmId);
-  }, [active.video, activeLayer, canUseVideo, isMobile, next.video]);
-
-  // When the slide index changes, crossfade to the other layer.
-  useEffect(() => {
-    if (!canUseVideo) return;
-    setActiveLayer((l) => (l === 0 ? 1 : 0));
-  }, [canUseVideo, currentSlide]);
-
-  // Keep the newly active layer playing once it becomes active.
-  useEffect(() => {
-    if (!canUseVideo) return;
-    const el = (activeLayer === 0 ? videoRef0 : videoRef1).current;
-    if (!el) return;
     try {
-      void el.play();
+      nextVideo.currentTime = 0;
     } catch {
-      // ignore
+      /* ignore */
     }
+    try {
+      void nextVideo.play();
+    } catch {
+      /* ignore */
+    }
+
+    // Pause the previous after the fade completes.
+    window.setTimeout(() => {
+      try {
+        prevVideo.pause();
+      } catch {
+        /* ignore */
+      }
+      switchLockRef.current = false;
+    }, 700);
+  };
+
+  const startNextFrom = (from: 0 | 1) => {
+    if (switchLockRef.current) return;
+    switchLockRef.current = true;
+    startLayer(from === 0 ? 1 : 0);
+  };
+
+  // Play videos sequentially with no pause:
+  // - Keep two <video> layers (one per hero video)
+  // - Start the next video slightly before the current ends and crossfade layers
+  useEffect(() => {
+    if (!canUseVideo) return;
+    const v0 = videoRef0.current;
+    const v1 = videoRef1.current;
+    if (!v0 || !v1) return;
+
+    if (startedRef.current) return;
+    startedRef.current = true;
+
+    try { v0.load(); } catch { /* ignore */ }
+    try { v1.load(); } catch { /* ignore */ }
+    try { v0.pause(); } catch { /* ignore */ }
+    try { v1.pause(); } catch { /* ignore */ }
+
+    startLayer(0);
   }, [activeLayer, canUseVideo]);
+
+  const active = heroSlides[currentSlide];
 
   return (
     <main className="overflow-x-hidden">
@@ -186,27 +179,45 @@ const Index = () => {
                 ref={videoRef0}
                 autoPlay
                 muted
-                loop
                 playsInline
                 preload="none"
                 disablePictureInPicture
                 disableRemotePlayback
+                onTimeUpdate={() => {
+                  if (activeLayerRef.current !== 0) return;
+                  const v = videoRef0.current;
+                  if (!v || !Number.isFinite(v.duration) || v.duration === 0) return;
+                  if (v.duration - v.currentTime <= 0.25) startNextFrom(0);
+                }}
+                onEnded={() => {
+                  if (activeLayerRef.current !== 0) return;
+                  startNextFrom(0);
+                }}
                 className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 will-change-[opacity] ${activeLayer === 0 ? "opacity-100" : "opacity-0"}`}
               >
-                {layerSrc[0] && <source src={layerSrc[0]} type="video/mp4" />}
+                <source src={heroSlides[0].video} type="video/mp4" />
               </video>
               <video
                 ref={videoRef1}
                 autoPlay
                 muted
-                loop
                 playsInline
                 preload="none"
                 disablePictureInPicture
                 disableRemotePlayback
+                onTimeUpdate={() => {
+                  if (activeLayerRef.current !== 1) return;
+                  const v = videoRef1.current;
+                  if (!v || !Number.isFinite(v.duration) || v.duration === 0) return;
+                  if (v.duration - v.currentTime <= 0.25) startNextFrom(1);
+                }}
+                onEnded={() => {
+                  if (activeLayerRef.current !== 1) return;
+                  startNextFrom(1);
+                }}
                 className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 will-change-[opacity] ${activeLayer === 1 ? "opacity-100" : "opacity-0"}`}
               >
-                {layerSrc[1] && <source src={layerSrc[1]} type="video/mp4" />}
+                <source src={heroSlides[1].video} type="video/mp4" />
               </video>
             </>
           )}
