@@ -14,7 +14,7 @@ const Footer = () => (
       aria-hidden="true"
       width={800}
       height={1200}
-      className="absolute inset-0 h-full w-full object-cover opacity-15 pointer-events-none"
+      className="absolute inset-0 h-full w-full object-cover opacity-70 pointer-events-none"
       loading="lazy"
       decoding="async"
     />
@@ -59,8 +59,9 @@ const Footer = () => (
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-flex items-center gap-2 rounded-full bg-whatsapp px-4 py-2.5 text-xs font-bold text-whatsapp-foreground shadow-lg shadow-whatsapp/30 hover:scale-105 transition-all"
+            className="group relative mt-5 inline-flex items-center gap-2 rounded-full bg-whatsapp px-4 py-2.5 text-xs font-black text-whatsapp-foreground shadow-2xl shadow-whatsapp/50 hover:shadow-whatsapp/70 hover:scale-[1.05] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/60 focus-visible:ring-offset-2 focus-visible:ring-offset-card"
           >
+            <span aria-hidden="true" className="pointer-events-none absolute -inset-1 rounded-full bg-whatsapp/30 blur-xl opacity-70 group-hover:opacity-100 transition-opacity" />
             <MessageCircle className="h-4 w-4" /> WhatsApp Us
           </a>
         </div>

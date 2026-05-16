@@ -9,6 +9,7 @@ import bleach20l from "@/assets/bleach-20l.webp";
 import detergentSmall from "@/assets/detergent-small.jpeg";
 import bleachSmall from "@/assets/bleach-small.jpeg";
 import zimFlag from "@/assets/zim-flag.png";
+import logo from "@/assets/logo.webp";
 
 const WA_BASE = "https://wa.me/263784576365?text=";
 
@@ -61,6 +62,16 @@ const Card = ({ p, delay }: { p: Product; delay: number }) => (
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-muted to-card">
         <div className="absolute inset-0 gradient-aurora opacity-40" />
+        <img
+          src={logo}
+          alt=""
+          aria-hidden="true"
+          width={600}
+          height={600}
+          loading="lazy"
+          decoding="async"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[72%] max-w-[320px] opacity-[0.05] blur-[0.5px] pointer-events-none select-none"
+        />
         <img
           src={p.image}
           alt={`${p.name} ${p.size}`}

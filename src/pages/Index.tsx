@@ -10,13 +10,22 @@ import detergent750ml from "@/assets/detergent-750ml.webp";
 import ceoImage from "@/assets/ceo-gamu.webp";
 import zimFlag from "@/assets/zim-flag.png";
 import logo from "@/assets/logo.webp";
+import premiumQualityTile from "@/assets/features/premium-quality.jpg";
+import multipleSizesTile from "@/assets/features/multiple-sizes.png";
+import trustedBrandTile from "@/assets/features/trusted-brand.jpg";
+import madeLocalTile from "@/assets/features/made-local.jpg";
 
 const WA = "https://wa.me/263784576365?text=Hello%20Rabah%20Sparkle,%20I%20would%20like%20to%20order";
 
 const Reveal = ({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) => {
   const { ref, visible } = useScrollReveal();
   return (
-    <div ref={ref} className={`transition-all duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+    <div
+      ref={ref}
+      data-visible={visible}
+      className={`group/reveal transition-all duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
       {children}
     </div>
   );
@@ -256,7 +265,13 @@ const Index = () => {
 
               <Reveal delay={300}>
                 <div className="mt-4 md:mt-8 flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center md:justify-start">
-                  <a href={WA} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp px-6 py-3 md:py-4 text-sm font-bold text-whatsapp-foreground shadow-lg shadow-whatsapp/30 hover:shadow-whatsapp/50 hover:scale-[1.03] transition-all duration-500">
+                  <a
+                    href={WA}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp px-6 py-3 md:py-4 text-sm font-black text-whatsapp-foreground shadow-2xl shadow-whatsapp/50 hover:shadow-whatsapp/70 hover:scale-[1.05] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-whatsapp/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background animate-pulse-glow"
+                  >
+                    <span aria-hidden="true" className="pointer-events-none absolute -inset-1 rounded-full bg-whatsapp/30 blur-xl opacity-70 group-hover:opacity-100 transition-opacity" />
                     <MessageCircle className="h-5 w-5" /> Order on WhatsApp
                   </a>
                   <Link to="/products" className="group inline-flex items-center justify-center gap-2 rounded-full glass border border-border/60 px-6 py-3 md:py-4 text-sm font-bold text-foreground hover:border-primary/50 transition-all duration-500">
@@ -371,6 +386,16 @@ const Index = () => {
                   <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-muted to-card">
                     <div className="absolute inset-0 gradient-aurora opacity-50" />
                     <img
+                      src={logo}
+                      alt=""
+                      aria-hidden="true"
+                      width={600}
+                      height={600}
+                      loading="lazy"
+                      decoding="async"
+                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] max-w-[320px] opacity-[0.06] blur-[0.5px] pointer-events-none select-none"
+                    />
+                    <img
                       src={p.image}
                       alt={p.name}
                       width={675}
@@ -406,24 +431,53 @@ const Index = () => {
       {/* FEATURES strip */}
       <section className="relative py-20 md:py-28 bg-card/50">
         <div className="container">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { icon: Sparkles, title: "Premium Quality", desc: "Tough on dirt, gentle on surfaces." },
-              { icon: Droplets, title: "Multiple Sizes", desc: "From 750ml to 20L bulk." },
-              { icon: Shield, title: "Trusted Brand", desc: "Used by businesses across Zimbabwe." },
-              { icon: CheckCircle2, title: "Made Local", desc: "Proudly Zimbabwean manufacturing." },
-            ].map((f, i) => (
-              <Reveal key={f.title} delay={i * 80}>
-                <div className="group h-full rounded-2xl glass border border-border/60 p-6 hover:border-primary/40 transition-all duration-500 hover:-translate-y-1 shadow-card tile-shadow hover:shadow-elegant">
-                  <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform duration-500">
-                    <f.icon className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                  <h3 className="mt-4 font-heading text-base font-bold text-foreground text-shadow-soft">{f.title}</h3>
-                  <p className="mt-1 text-sm text-foreground/75 leading-relaxed">{f.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+	          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+	            {[
+	              { icon: Sparkles, title: "Premium Quality", desc: "Tough on dirt, gentle on surfaces.", image: premiumQualityTile, width: 960, height: 640 },
+	              { icon: Droplets, title: "Multiple Sizes", desc: "From 750ml to 20L bulk.", image: multipleSizesTile, width: 1200, height: 600 },
+	              { icon: Shield, title: "Trusted Brand", desc: "Used by businesses across Zimbabwe.", image: trustedBrandTile, width: 742, height: 960, imgClassName: "object-[85%_70%]" },
+	              { icon: CheckCircle2, title: "Made Local", desc: "Proudly Zimbabwean manufacturing.", image: madeLocalTile, width: 960, height: 640 },
+	            ].map((f, i) => (
+	              <Reveal key={f.title} delay={i * 80}>
+	                <div className="group relative h-full overflow-hidden rounded-2xl glass border border-border/60 p-6 hover:border-primary/40 transition-all duration-500 hover:-translate-y-1 shadow-card tile-shadow hover:shadow-elegant">
+	                  <img
+	                    src={f.image}
+	                    alt=""
+	                    aria-hidden="true"
+	                    width={f.width}
+	                    height={f.height}
+	                    loading="lazy"
+	                    decoding="async"
+		                    className={`absolute inset-0 h-full w-full object-cover opacity-0 -translate-x-6 group-data-[visible=true]/reveal:opacity-45 group-data-[visible=true]/reveal:translate-x-0 group-hover:opacity-65 transition-[opacity,transform] duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] ${"imgClassName" in f ? (f as { imgClassName?: string }).imgClassName ?? "" : ""}`}
+		                    style={{
+		                      transitionDelay: `${i * 120}ms`,
+		                      WebkitMaskImage:
+		                        "linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,1) 100%)",
+		                      maskImage:
+		                        "linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,1) 100%)",
+		                    }}
+		                  />
+	                  {/* Left→Right "wipe": keep left side clean/white and ramp image intensity to the right */}
+	                  <div
+	                    className="absolute inset-0"
+	                    style={{
+	                      WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,1) 100%)",
+	                      maskImage: "linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,1) 100%)",
+	                      background: "linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 30%, transparent 100%)",
+	                    }}
+	                  />
+		                  <div className="absolute inset-0 bg-gradient-to-t from-background/92 via-background/72 to-background/45 group-hover:from-background/84 group-hover:via-background/56 group-hover:to-background/24 transition-all duration-700" />
+	                  <div className="relative">
+	                    <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform duration-500">
+	                      <f.icon className="h-6 w-6 text-primary-foreground" />
+	                    </div>
+	                    <h3 className="mt-4 font-heading text-base font-bold text-foreground text-shadow-soft">{f.title}</h3>
+	                    <p className="mt-1 text-sm text-foreground/75 leading-relaxed">{f.desc}</p>
+	                  </div>
+	                </div>
+	              </Reveal>
+	            ))}
+	          </div>
         </div>
       </section>
 

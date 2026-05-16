@@ -207,7 +207,13 @@ const About = () => (
           <h2 className="font-heading text-3xl md:text-5xl font-black text-primary-foreground leading-tight">Ready to order?</h2>
           <p className="mt-3 text-primary-foreground/85">Get in touch and place your order today.</p>
           <div className="mt-8">
-            <a href={WA} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full bg-background px-8 py-4 text-base font-bold text-foreground shadow-2xl hover:scale-105 transition-all duration-500">
+            <a
+              href={WA}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative inline-flex items-center gap-2 rounded-full bg-background px-8 py-4 text-base font-black text-foreground shadow-2xl shadow-background/20 hover:scale-[1.06] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+            >
+              <span aria-hidden="true" className="pointer-events-none absolute -inset-1 rounded-full bg-background/40 blur-xl opacity-70 group-hover:opacity-100 transition-opacity" />
               <MessageCircle className="h-5 w-5 text-whatsapp" /> Chat on WhatsApp
             </a>
           </div>
