@@ -69,7 +69,7 @@ const Footer = () => (
 
       <div className="mt-12 border-t border-border/50 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
         <span>© {new Date().getFullYear()} Rabah Sparkle Detergents. All rights reserved.</span>
-        <span className="opacity-70">Crafted with care in 🇿🇼</span>
+        <span className="opacity-70">BY GRAND HORIZONS</span>
       </div>
     </div>
   </footer>
